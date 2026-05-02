@@ -42,8 +42,8 @@ app.post('/api/pix/criar', async (req, res) => {
         console.log('👤 Cliente:', req.body.email);
         console.log('💵 Plano:', req.body.plano, 'Valor:', req.body.valor);
         
-        if (!process.env.SYNCPAY_CLIENT_ID) {
-            console.error('⚠️ SYNCPAY_CLIENT_ID não configurado no .env');
+        if (!process.env.NEXUSPAG_TOKEN) {
+            console.error('⚠️ NEXUSPAG_TOKEN não configurado no .env');
         }
 
         const result = await pix.criarPixSyncPay(req.body);
@@ -92,8 +92,8 @@ app.post('/api/vips/resgatar-link', async (req, res) => {
 
 // ── WEBHOOKS ────────────────────────────────────────────────
 
-app.post('/api/webhook/syncpay', async (req, res) => {
-    console.log('✉️ Webhook SyncPay recebido');
+app.post('/api/webhook/nexuspag', async (req, res) => {
+    console.log('✉️ Webhook NexusPag recebido');
     res.sendStatus(200);
 });
 
