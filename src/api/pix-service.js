@@ -1,22 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'https://api.syncpayments.com.br';
-
-async function getAuthToken() {
-    try {
-        const payload = {
-            client_id: process.env.SYNCPAY_CLIENT_ID,
-            client_secret: process.env.SYNCPAY_CLIENT_SECRET
-        };
-        const response = await axios.post(`${BASE_URL}/api/partner/v1/auth-token`, payload);
-        return response.data.access_token;
-    } catch (err) {
-        console.error('❌ Erro ao obter token SyncPay:', err.response?.data || err.message);
-        throw new Error('Falha na autenticação com SyncPay');
-    }
-}
-
-async function criarPixSyncPay(dados) {
+async function criarPix(dados) {
     try {
         // Limpeza do valor
         const apenasNumeros = dados.valor.replace(/[^\d,.]/g, '').replace(',', '.');
@@ -26,38 +10,34 @@ async function criarPixSyncPay(dados) {
             throw new Error('Valor inválido para o PIX');
         }
 
-        const token = await getAuthToken();
+        console.log(`📡 Gerando PIX via AlphaBot: R$ ${valor}`);
 
-        const payload = {
-            amount: valor,
-            description: `Assinatura ${dados.plano || 'Privacy'}`,
-            webhook_url: `${process.env.APP_URL || 'http://localhost:3000'}/api/webhook/syncpay`,
-            client: {
-                name: dados.nome || 'Cliente Privacy',
-                cpf: dados.cpf || '00000000000',
-                email: dados.email || 'cliente@privacy.com',
-                phone: dados.whatsapp || '11999999999'
+        const response = await axios.post(
+            'https://alphabotvips.com/api/v1/alpha-wallet/payments',
+            { amount: valor, description: `Assinatura ${dados.plano || 'Privacy'}` },
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.ALPHABOT_API_KEY}`,
+                    'X-Client-Id': process.env.ALPHABOT_CLIENT_ID,
+                    'Content-Type': 'application/json'
+                }
             }
-        };
+        );
 
-        console.log(`📡 Gerando PIX SyncPay: R$ ${valor}`);
+        if (!response.data || !response.data.brcode) {
+            throw new Error('AlphaBot não retornou dados de PIX válidos.');
+        }
 
-        const response = await axios.post(`${BASE_URL}/api/partner/v1/cash-in`, payload, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        console.log('✅ PIX SyncPay gerado com sucesso');
+        console.log('✅ PIX AlphaBot gerado com sucesso');
         
-        // SyncPay retorna pix_code (copia e cola) e qrcode (base64)
         return {
-            qr_code: response.data.pix_code,
-            qr_code_base64: response.data.qrcode
+            qr_code: response.data.brcode,
+            qr_code_base64: response.data.qr_code_base64 || ''
         };
     } catch (err) {
-        const errorDetail = err.response?.data || err.message;
-        console.error('❌ Erro na API do SyncPay:', JSON.stringify(errorDetail));
-        throw new Error(err.response?.data?.message || err.message);
+        console.error('❌ Erro na API do AlphaBot:', err.response?.data || err.message);
+        throw new Error('Falha ao conectar com o gateway de PIX (AlphaBot).');
     }
 }
 
-module.exports = { criarPixSyncPay };
+module.exports = { criarPixSyncPay: criarPix };
