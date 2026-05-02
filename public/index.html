@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark h-full antialiased">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Privacy</title>
+    <meta name="description"
+        content="Access exclusive premium photos and videos from your favorite creator. Subscribe for instant access to the full vault.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <style>
+        html,
+        body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        @keyframes gradient-x {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .animate-gradient-x {
+            animation: gradient-x 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #333;
+            border-radius: 20px;
+        }
+
+        .StripeElement {
+            transition: border-color 0.2s;
+        }
+
+        .StripeElement--focus {
+            border-color: #e89c30 !important;
+        }
+
+        .StripeElement--invalid {
+            border-color: #f87171 !important;
+        }
+
+        /* Card brand inline styles */
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e1e1e;
+            border-radius: 6px;
+            padding: 4px 8px;
+            height: 28px;
+        }
+
+        .brand-icon-sm {
+            height: 20px;
+            padding: 2px 6px;
+        }
+
+        /* Fix Autofill background */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 50px #1a1a1a inset !important;
+            -webkit-text-fill-color: #ffffff !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* Stripe Element container stability */
+        .stripe-input-container {
+            min-height: 56px;
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 1rem;
+            transition: border-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .stripe-input-container.StripeElement--focus {
+            border-color: #e89c30;
+        }
+
+        .stripe-input-container>div {
+            width: 100%;
+            padding: 0 1rem;
+        }
+    </style>
+</head>
+
+<body class="min-h-full flex flex-col bg-black text-white relative">
+
+    <header class="fixed inset-x-0 top-0 z-40 flex h-12 items-center justify-between bg-white px-4">
+        <a href="/" class="font-display text-[20px] font-extrabold tracking-[-0.08em] text-black">
+            privacy<span class="text-[#f59b32]">.</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <button
+                class="flex h-8 w-8 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-black">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="h-4.5 w-4.5">
+                    <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                    <path
+                        d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326">
+                    </path>
+                </svg>
+            </button>
+            <div class="h-8 w-8 overflow-hidden rounded-full bg-gray-200">
+                <div class="h-full w-full bg-gradient-to-br from-[#e89c30]/40 to-[#f5f5f5]"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="min-h-screen bg-white pt-12">
+        <div class="mx-auto flex max-w-[480px] flex-col gap-3 px-3 py-4 pb-12">
+
+            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                <div
+                    class="relative h-[200px] w-full bg-gradient-to-br from-[#f0f0f0] via-[#e0e0e0] to-[#d0d0d0] sm:h-[180px]">
+                    <img src="images/fundomodelo.png" alt="fundo"
+                        class="cover-bg absolute inset-0 opacity-100 object-cover w-full h-full">
+                    <div
+                        class="absolute -bottom-10 left-4 h-24 w-24 overflow-hidden rounded-full border-[3px] border-white bg-gray-200 shadow-md">
+                        <img src="images/perfil.png" alt="avatar" class="h-full w-full object-cover">
+                    </div>
+                </div>
+                <div class="px-4 pb-5 pt-14">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <h1 class="text-[17px] font-bold tracking-[-0.03em] text-black">Mirella Araújo</h1>
+                                <span class="flex h-4 w-4 items-center justify-center rounded-full bg-[#0000]">
+                                    <svg fill="none" viewBox="0 0 22 22" class="h-9 w-9"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M9.00012 12L11.0001 14L15.0001 10M7.83486 4.69705C8.55239 4.63979 9.23358 4.35763 9.78144 3.89075C11.0599 2.80123 12.9403 2.80123 14.2188 3.89075C14.7667 4.35763 15.4478 4.63979 16.1654 4.69705C17.8398 4.83067 19.1695 6.16031 19.3031 7.83474C19.3603 8.55227 19.6425 9.23346 20.1094 9.78132C21.1989 11.0598 21.1989 12.9402 20.1094 14.2187C19.6425 14.7665 19.3603 15.4477 19.3031 16.1653C19.1695 17.8397 17.8398 19.1693 16.1654 19.303C15.4479 19.3602 14.7667 19.6424 14.2188 20.1093C12.9403 21.1988 11.0599 21.1988 9.78144 20.1093C9.23358 19.6424 8.55239 19.3602 7.83486 19.303C6.16043 19.1693 4.83079 17.8397 4.69717 16.1653C4.63991 15.4477 4.35775 14.7665 3.89087 14.2187C2.80135 12.9402 2.80135 11.0598 3.89087 9.78132C4.35775 9.23346 4.63991 8.55227 4.69717 7.83474C4.83079 6.16031 6.16043 4.83067 7.83486 4.69705Z"
+                                            stroke="orange" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                    </svg>
+                                </span>
+                            </div>
+                            <p class="text-[15px] text-gray-500">@miry_arauofc</p>
+                        </div>
+                        <button
+                            class="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-black transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-4 w-4">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mt-4 flex items-center gap-4">
+                        <div class="flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400">
+                                <path d="m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16"></path>
+                                <path d="M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2"></path>
+                                <circle cx="13" cy="7" r="1" fill="currentColor"></circle>
+                                <rect x="8" y="2" width="14" height="14" rx="2"></rect>
+                            </svg>
+                            <span class="text-[14px] font-semibold text-black">159</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400">
+                                <path
+                                    d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z">
+                                </path>
+                            </svg>
+                            <span class="text-[14px] font-semibold text-black">626</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400">
+                                <path d="m16 11 2 2 4-4"></path>
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                            </svg>
+                            <span class="text-[14px] font-semibold text-black">53</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400">
+                                <path
+                                    d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5">
+                                </path>
+                            </svg>
+                            <span class="text-[14px] font-semibold text-black">364.6K</span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <p class="text-[15px] leading-relaxed text-black">Por trás desta carinha de anjo, a tua Japinha
+                            guarda segredos que só os assinantes conhecem. Vais ficar só a imaginar ou vens ver de
+                            perto? 😜🔞</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 space-y-3">
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="h-4 w-4 text-[#e89c30]">
+                            <path
+                                d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z">
+                            </path>
+                            <path d="M20 2v4"></path>
+                            <path d="M22 4h-4"></path>
+                            <circle cx="4" cy="20" r="2"></circle>
+                        </svg>
+                        <p class="text-[17px] font-semibold text-black">Oferta de assinatura</p>
+                    </div>
+                    <p class="mt-0.5 text-[12px] text-gray-600">Termina em <span id="countdown-timer"
+                            class="font-semibold text-[#e89c30]">...</span></p>
+                </div>
+                <div class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
+                    <p class="text-[15px] text-black">Acesso especial com atualizações diárias, conversas reservadas e
+                        íntimas.</p>
+                </div>
+                <div class="relative">
+                    <span
+                        class="absolute -top-2.5 left-3 z-10 rounded-full bg-[#4ade80] px-2.5 py-0.5 text-[13px] font-bold text-black">Economize
+                        26%</span>
+                    <button onclick="abrirCheckout('R$ 9,90', 'Acesso Especial')"
+                        class="w-full rounded-2xl py-4 text-[16px] font-bold text-black transition hover:opacity-90"
+                        style="background:linear-gradient(90deg, #e89c30 0%, #f5bc6a 60%, #f8c97e 100%)">Assinar agora
+                        R$ 9,90</button>
+                </div>
+                <button onclick="abrirCheckout('R$ 12,90', 'Ligar para Milly')"
+                    class="w-full rounded-2xl border border-gray-200 bg-gray-100 py-3 text-[16px] font-semibold text-black transition hover:bg-gray-200 hover:text-black">★
+                    Numero Exclusivo da Mirella!</button>
+                <p class="text-right text-[11px] text-gray-600">Preço original <span class="line-through">R$
+                        16,47</span></p>
+            </div>
+
+            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                <button class="flex w-full items-center justify-between px-4 py-3.5 transition hover:bg-gray-50">
+                    <p class="text-[17px] font-semibold text-black">Assinaturas</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-4 w-4 text-gray-400 transition-transform">
+                        <path d="m18 15-6-6-6 6"></path>
+                    </svg>
+                </button>
+                <div class="px-3 pb-3 space-y-2">
+                    <button onclick="abrirCheckout('R$ 14,90', '1 Mês')"
+                        class="text-black flex w-full items-center justify-between rounded-2xl px-5 py-3.5 text-left font-semibold transition hover:opacity-90 overflow-hidden relative bg-[length:200%_100%] animate-gradient-x"
+                        style="background:linear-gradient(90deg, #ffb163, #f5bc6a, #f8c97e, #e89c30);color:#000"><span
+                            class="text-[16px] font-semibold">1 Mês (26% off)</span><span
+                            class="text-[16px] font-bold">R$ 14,90</span></button>
+                    <button onclick="abrirCheckout('R$ 19,90', '3 Meses')"
+                        class="text-black flex w-full items-center justify-between rounded-2xl px-5 py-3.5 text-left font-semibold transition hover:opacity-90 overflow-hidden relative bg-[length:200%_100%] animate-gradient-x"
+                        style="background:linear-gradient(90deg, #ffb163, #f5bc6a, #f8c97e, #e89c30);color:#000"><span
+                            class="text-[16px] font-semibold">3 meses (42% off)</span><span
+                            class="text-[16px] font-bold">R$ 19,90</span></button>
+                    <button onclick="abrirCheckout('R$ 29,90', 'Vazados da Mirella')"
+                        class="text-black flex w-full items-center justify-between rounded-2xl px-5 py-3.5 text-left font-semibold transition hover:opacity-90 overflow-hidden relative bg-[length:200%_100%] animate-gradient-x"
+                        style="background:linear-gradient(90deg, #ffb163, #f5bc6a, #f8c97e, #e89c30);color:#000"><span
+                            class="text-[16px] font-semibold">Vazados da Mirella 🔥</span><span
+                            class="text-[16px] font-bold">R$ 29,90</span></button>
+                    <button onclick="abrirCheckout('R$ 39,90', 'Vitalício')"
+                        class="text-black flex w-full items-center justify-between rounded-2xl px-5 py-3.5 text-left font-semibold transition hover:opacity-90 overflow-hidden relative bg-[length:200%_100%] animate-gradient-x"
+                        style="background:linear-gradient(90deg, #ffb163, #f5bc6a, #f8c97e, #e89c30);color:#000"><span
+                            class="text-[16px] font-semibold">Vitalício (50% off)</span><span
+                            class="text-[16px] font-bold">R$ 39,90</span></button>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                    <button
+                        class="flex flex-1 items-center justify-center gap-1.5 px-3 py-3.5 text-[15px] font-semibold transition text-[#e89c30]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="h-3.5 w-3.5 text-[#e89c30]">
+                            <path d="m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16"></path>
+                            <path d="M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2"></path>
+                            <circle cx="13" cy="7" r="1" fill="currentColor"></circle>
+                            <rect x="8" y="2" width="14" height="14" rx="2"></rect>
+                        </svg>
+                        513 Postagens
+                    </button>
+                    <button
+                        class="flex flex-1 items-center justify-center gap-1.5 px-3 py-3.5 text-[15px] font-semibold transition text-black-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="h-3.5 w-3.5">
+                            <path
+                                d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z">
+                            </path>
+                        </svg>
+                        1.323 Mídias
+                    </button>
+                </div>
+
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div class="flex items-center gap-2.5">
+                            <div
+                                class="h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-[#e89c30]/40 to-[#f5f5f5] flex items-center justify-center">
+                                <img src="images/perfil.png" alt="avatar" class="h-full w-full object-cover">
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1"><span
+                                        class="text-[15px] font-semibold text-black">Mirella Araújo</span></div>
+                                <p class="text-[12px] text-gray-600">@miry_arauofc</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative aspect-video w-full bg-gradient-to-br from-[#f0f0f0] to-[#ffffff] cursor-pointer"
+                        onclick="abrirCheckout('R$ 9,90', 'Acesso Especial')">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 z-20">
+                            <button
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-white/0 text-white backdrop-blur-sm border border-white/30 shadow-lg"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="h-5 w-5">
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg></button>
+                            <span
+                                class="rounded-full bg-[#e89c30] px-3 py-1 text-[12px] font-semibold text-black">Assinar
+                                para ver</span>
+                        </div>
+                        <img src="images/teaser1.jpg" alt="media"
+                            class="absolute inset-0 h-full w-full object-cover blur-sm brightness-75">
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div class="flex items-center gap-4">
+                            <button class="flex items-center gap-1.5 text-gray-500 hover:text-gray-700"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="h-4.5 w-4.5">
+                                    <path
+                                        d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5">
+                                    </path>
+                                </svg><span class="text-[15px]">124</span></button>
+                            <button class="flex items-center gap-1.5 text-gray-500 hover:text-gray-700"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="h-4.5 w-4.5">
+                                    <path
+                                        d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719">
+                                    </path>
+                                </svg><span class="text-[15px]">18</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div class="flex items-center gap-2.5">
+                            <div
+                                class="h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-[#e89c30]/40 to-[#f5f5f5] flex items-center justify-center">
+                                <img src="images/perfil.png" alt="avatar" class="h-full w-full object-cover">
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1"><span
+                                        class="text-[15px] font-semibold text-black">Mirella Araújo</span></div>
+                                <p class="text-[12px] text-gray-600">@miry_arauofc</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative aspect-video w-full bg-gradient-to-br from-[#f0f0f0] to-[#ffffff] cursor-pointer"
+                        onclick="abrirCheckout('R$ 9,90', 'Acesso Especial')">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 z-20">
+                            <button
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-white/0 text-white backdrop-blur-sm border border-white/30 shadow-lg"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="h-5 w-5">
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg></button>
+                            <span
+                                class="rounded-full bg-[#e89c30] px-3 py-1 text-[12px] font-semibold text-black">Assinar
+                                para ver</span>
+                        </div>
+                        <img src="images/teaser2.jpg" alt="media"
+                            class="absolute inset-0 h-full w-full object-cover blur-sm brightness-75">
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div class="flex items-center gap-4">
+                            <button class="flex items-center gap-1.5 text-gray-500 hover:text-gray-700"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="h-4.5 w-4.5">
+                                    <path
+                                        d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5">
+                                    </path>
+                                </svg><span class="text-[15px]">341</span></button>
+                            <button class="flex items-center gap-1.5 text-gray-500 hover:text-gray-700"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="h-4.5 w-4.5">
+                                    <path
+                                        d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719">
+                                    </path>
+                                </svg><span class="text-[15px]">47</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-pagamento"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="w-full max-w-[420px] rounded-2xl bg-[#121212] border border-[#2a2a2a] shadow-2xl my-8 relative">
+
+            <div class="p-5 border-b border-[#2a2a2a] flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold tracking-widest text-[#e89c30] uppercase mb-1">privacy.</p>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Pagamento Seguro</h2>
+                </div>
+                <button onclick="fecharModal()"
+                    class="h-8 w-8 flex items-center justify-center rounded-full text-gray-500 hover:text-white hover:bg-white/10 transition"><svg
+                        width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg></button>
+            </div>
+
+            <div class="bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 py-3 flex items-center gap-3">
+                <img src="images/perfil.png" class="w-11 h-11 rounded-full object-cover border-2 border-[#2a2a2a]">
+                <div class="flex-1 min-w-0">
+                    <p class="text-white font-bold text-[15px] leading-tight">Mirella Araújo</p>
+                    <p class="text-gray-500 text-xs">@miry_arauofc</p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-[10px] text-[#e89c30] font-bold uppercase tracking-wider">Valor</p>
+                    <p id="modal-preco" class="text-[22px] font-bold text-white leading-none">R$ 9,90</p>
+                    <p id="modal-duracao" class="text-gray-500 text-[11px] mt-0.5">Acesso Especial</p>
+                </div>
+            </div>
+
+            <div id="step-selecao" class="p-5 space-y-4 text-center">
+                <div class="mb-2">
+                    <h3 class="text-[20px] font-bold text-white">Identificação</h3>
+                    <p class="text-gray-400 text-[13px]">Informe onde deseja receber o seu acesso</p>
+                </div>
+
+                <div class="relative text-left">
+                    <label
+                        class="block text-[10px] font-bold text-gray-500 uppercase tracking-[0.1em] mb-1.5 ml-1">E-mail
+                        de Acesso</label>
+                    <input id="email-cliente" type="email" placeholder="seu-email@exemplo.com" required
+                        class="w-full bg-[#111] border border-[#222] rounded-2xl px-4 py-4 text-white text-[15px] placeholder-gray-700 focus:outline-none focus:border-[#e89c30] transition shadow-inner">
+                </div>
+
+                <div class="flex items-center gap-3 my-4">
+                    <div class="h-px bg-[#222] flex-1"></div>
+                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Pagamento Seguro</span>
+                    <div class="h-px bg-[#222] flex-1"></div>
+                </div>
+
+                <h3 class="text-[18px] font-bold text-white">Escolha o Método</h3>
+
+
+                <button onclick="selecionarMetodo('pix')"
+                    class="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-4 flex items-center gap-4 hover:border-[#e89c30] hover:bg-[#1e1e1e] transition group">
+                    <div class="w-12 h-12 rounded-2xl bg-[#e89c30]/10 flex items-center justify-center flex-shrink-0">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e89c30" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="14" x="2" y="5" rx="2" />
+                            <path d="M12 12h.01" />
+                            <path d="M17 12h.01" />
+                            <path d="M7 12h.01" />
+                        </svg>
+                    </div>
+                    <div class="text-left flex-1">
+                        <p class="text-white font-bold text-[15px] group-hover:text-[#e89c30] transition">PIX</p>
+                        <p class="text-gray-500 text-[12px]">Pagamento instantâneo via QR Code</p>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2">
+                        <path d="m9 18 6-6-6-6" />
+                    </svg>
+                </button>
+
+                <button onclick="selecionarMetodo('cartao')"
+                    class="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-4 flex items-center gap-4 hover:border-[#e89c30] hover:bg-[#1e1e1e] transition group">
+                    <div class="w-12 h-12 rounded-2xl bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                            <rect width="20" height="14" x="2" y="5" rx="2" />
+                            <line x1="2" x2="22" y1="10" y2="10" />
+                        </svg>
+                    </div>
+                    <div class="text-left flex-1">
+                        <p class="text-white font-bold text-[15px] group-hover:text-[#e89c30] transition">Cartão de
+                            Crédito ou Débito</p>
+                        <p class="text-gray-500 text-[12px]">Visa, Mastercard, Elo e outras bandeiras</p>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2">
+                        <path d="m9 18 6-6-6-6" />
+                    </svg>
+                </button>
+
+                <div class="flex items-center justify-center gap-2 pt-2">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <span class="text-[11px] text-gray-600">Ambiente seguro e criptografado</span>
+                </div>
+            </div>
+
+            <div id="conteudo-pix" class="hidden p-5 space-y-4 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                <button onclick="voltarParaSelecao()"
+                    class="flex items-center gap-1.5 text-gray-500 hover:text-white text-[13px] font-semibold transition"><svg
+                        width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg> Voltar</button>
+                <div class="text-center space-y-1">
+                    <p class="text-[#e89c30] text-[13px] font-bold">PIX gerado com sucesso</p>
+                    <h5 id="status-pix" class="text-white font-bold text-[16px]">Gerando seu PIX...</h5>
+                </div>
+                <div class="flex justify-center">
+                    <div class="bg-white p-3 rounded-2xl"><img id="pix-qr-image" src="" alt="QR Code PIX"
+                            class="w-44 h-44 object-contain"></div>
+                </div>
+                <p class="text-white font-bold text-[14px] text-center">Ou copie o código PIX</p>
+                <div class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-4">
+                    <p id="pix-payload-text" class="text-gray-400 text-[11px] break-all font-mono text-center">
+                        Aguarde...</p>
+                </div>
+                <button onclick="copiarPix()"
+                    class="w-full bg-[#3b82f6] hover:bg-blue-500 transition text-white font-bold text-[15px] py-4 rounded-2xl flex items-center justify-center gap-2"><svg
+                        width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                    </svg> Copiar código PIX</button>
+                <div class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 flex gap-3">
+                    <svg class="w-5 h-5 text-[#e89c30] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 16v-4" />
+                        <path d="M12 8h.01" />
+                    </svg>
+                    <div>
+                        <p class="text-[13px] text-gray-300">Abra o app do banco, escaneie o QR ou cole o código PIX.
+                        </p>
+                        <p class="text-[12px] text-gray-500 flex items-center gap-1.5 mt-2"><svg
+                                class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg> Aguardando confirmação...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="conteudo-cartao" class="hidden p-4 space-y-5 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                <button onclick="voltarParaSelecao()"
+                    class="flex items-center gap-1.5 text-gray-500 hover:text-white text-[13px] font-semibold transition mb-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg> Voltar
+                </button>
+
+                <!-- Mercado Pago Card Brick Container -->
+                <div id="cardPaymentBrick_container"></div>
+
+                <div class="space-y-2 pt-1 border-t border-[#2a2a2a] mt-4">
+                    <p class="text-center text-[11px] text-gray-600 flex items-center justify-center gap-1.5 pt-2"><svg
+                            width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg> Cobranças em seu cartão aparecerão como <span
+                            class="text-gray-400 font-semibold ml-1">Privacy</span></p>
+                    <p class="text-center text-[10px] text-gray-700">Pagamento processado com segurança pelo Mercado
+                        Pago
+                        · Renovação automática</p>
+                </div>
+            </div>
+
+            <div id="conteudo-sucesso" class="hidden p-8 text-center space-y-4">
+                <div
+                    class="w-16 h-16 rounded-full bg-green-500/15 flex items-center justify-center mx-auto border border-green-500/30">
+                    <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-white font-bold text-[20px]">Pagamento confirmado!</h3>
+                <p class="text-gray-400 text-[14px]">Seu acesso foi liberado. Bem-vindo(a)! 🎉</p>
+                <button onclick="acaoPosPayment()" class="w-full rounded-2xl py-4 text-[15px] font-bold text-black"
+                    style="background: linear-gradient(90deg, #e89c30, #f8c97e)" id="btn-pos-pagamento">Acessar
+                    conteúdo</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/checkout-handler.js"></script>
+</body>
+
+</html>
