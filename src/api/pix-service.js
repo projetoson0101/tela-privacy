@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'https://api.syncpay.io.br';
+const BASE_URL = 'https://api.syncpayments.com.br';
 
 async function getAuthToken() {
     try {
